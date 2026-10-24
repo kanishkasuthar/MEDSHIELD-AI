@@ -1,0 +1,82 @@
+services:
+  # ----------------------------------------------------------------------------
+  # PostgreSQL Database (Persistent cloud storage)
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: medshield-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-medshield}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-securemedshield2026}
+      POSTGRES_DB: ${POSTGRES_DB:-medshield_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medshield -d medshield_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------------------------
+  # MEDSHIELD AI — Core API & Incident Response Service
+  # ----------------------------------------------------------------------------
+  medshield-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medshield-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_ENV: production
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+psycopg://medshield:${POSTGRES_PASSWORD:-securemedshield2026}@postgres:5432/medshield_db
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      APPROVAL_SIGNING_SECRET: ${APPROVAL_SIGNING_SECRET:-secure-incident-approval-hmac-key-2026}
+      APPROVAL_EXPIRY_SECONDS: 300
+      PAYMENT_SANDBOX_MODE: "true"
+      PAYMENT_MAX_INSTITUTIONAL_LIMIT: 25000.0
+    ports:
+      - "8000:8000"
+    volumes:
+      - app_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ----------------------------------------------------------------------------
+  # MEDSHIELD AI — Fetch.ai Agent Chat Protocol (ACP) & ASI:One Connector
+  # ----------------------------------------------------------------------------
+  medshield-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medshield-agent
+    restart: unless-stopped
+    depends_on:
+      medshield-api:
+        condition: service_healthy
+    command: ["python", "scripts/run_agent.py"]
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://medshield:${POSTGRES_PASSWORD:-securemedshield2026}@postgres:5432/medshield_db
+      AGENT_SEED_COMMANDER: ${AGENT_SEED_COMMANDER:-medshield_incident_commander_seed_phrase_demo_2026}
+      AGENT_PORT_COMMANDER: 8001
+      AGENT_MAILBOX_KEY: ${AGENT_MAILBOX_KEY:-}
+      AGENTVERSE_API_KEY: ${AGENTVERSE_API_KEY:-}
+    ports:
+      - "8001:8001"
+
+volumes:
+  postgres_data:
+    driver: local
+  app_data:
+    driver: local
