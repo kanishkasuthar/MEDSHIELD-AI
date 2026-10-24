@@ -12,10 +12,10 @@ class Settings(BaseSettings):
 
     api_host: str = Field(default="0.0.0.0", alias="API_HOST")
     api_port: int = Field(default=8000, alias="API_PORT")
-    api_secret_key: str = Field(default="medshield-secret-key-default-2026", alias="API_SECRET_KEY")
+    api_secret_key: str = Field(default="dev-insecure-api-secret-key-change-in-production", alias="API_SECRET_KEY")
 
     agent_seed_commander: str = Field(
-        default="medshield_incident_commander_seed_phrase_demo_2026",
+        default="dev-agent-seed-phrase-placeholder-demo-2026",
         alias="AGENT_SEED_COMMANDER"
     )
     agent_port_commander: int = Field(default=8001, alias="AGENT_PORT_COMMANDER")
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     simulator_tick_rate_ms: int = Field(default=500, alias="SIMULATOR_TICK_RATE_MS")
 
     approval_signing_secret: str = Field(
-        default="secure-incident-approval-hmac-key-2026",
+        default="dev-insecure-approval-hmac-key-change-in-production",
         alias="APPROVAL_SIGNING_SECRET"
     )
     approval_expiry_seconds: int = Field(default=300, alias="APPROVAL_EXPIRY_SECONDS")

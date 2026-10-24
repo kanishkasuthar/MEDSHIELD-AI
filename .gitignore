@@ -29,3 +29,10 @@ venv/
 *.sqlite3
 *.log
 .env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+data/
+medshield.db
