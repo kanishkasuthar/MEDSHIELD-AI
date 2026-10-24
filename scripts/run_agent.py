@@ -1,6 +1,12 @@
 """Runner for the Fetch.ai ACP Incident Commander & Chatbot Agent."""
 
 import sys
+from pathlib import Path
+
+_src_path = str(Path(__file__).resolve().parent.parent / "src")
+if _src_path not in sys.path:
+    sys.path.insert(0, _src_path)
+
 from medshield.api.app import container
 from medshield.protocols.acp_adapter import create_asi_one_uagent
 from medshield.config import settings

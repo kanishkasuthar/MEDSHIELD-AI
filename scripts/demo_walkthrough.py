@@ -14,7 +14,12 @@ Runs through the complete multi-agent hospital incident response lifecycle:
 """
 
 import sys
+from pathlib import Path
 from datetime import datetime, timezone
+
+_src_path = str(Path(__file__).resolve().parent.parent / "src")
+if _src_path not in sys.path:
+    sys.path.insert(0, _src_path)
 
 from medshield.db.session import init_db, SessionLocal, AuditLogger
 from medshield.simulator.service import SyntheticHospitalSimulator
